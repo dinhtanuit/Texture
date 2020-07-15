@@ -50,39 +50,31 @@ static UIImage *UITextViewImageWithAttributes(const ASTextKitAttributes &attribu
                                               const CGSize constrainedSize,
                                               NSDictionary *linkTextAttributes)
 {
-  UITextView *textView = UITextViewWithAttributes(attributes, constrainedSize, linkTextAttributes);
-  UIGraphicsBeginImageContextWithOptions(constrainedSize, NO, 0);
-  CGContextRef context = UIGraphicsGetCurrentContext();
-  
-  CGContextSaveGState(context);
-  {
-    [textView.layer renderInContext:context];
-  }
-  CGContextRestoreGState(context);
-  
-  UIImage *snapshot = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  
-  return snapshot;
+    UITextView *textView = UITextViewWithAttributes(attributes, constrainedSize, linkTextAttributes);
+
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:constrainedSize];
+    return [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+        CGContextRef context = rendererContext.CGContext;
+        
+        CGContextSaveGState(context);
+        [textView.layer renderInContext:context];
+        CGContextRestoreGState(context);
+    }];
 }
 
 static UIImage *ASTextKitImageWithAttributes(const ASTextKitAttributes &attributes, const CGSize constrainedSize)
 {
-  ASTextKitRenderer *renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes
-                                                                     constrainedSize:constrainedSize];
-  UIGraphicsBeginImageContextWithOptions(constrainedSize, NO, 0);
-  CGContextRef context = UIGraphicsGetCurrentContext();
-  
-  CGContextSaveGState(context);
-  {
-    [renderer drawInContext:context bounds:{.size = constrainedSize}];
-  }
-  CGContextRestoreGState(context);
-  
-  UIImage *snapshot = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  
-  return snapshot;
+    ASTextKitRenderer *renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes
+                                                                       constrainedSize:constrainedSize];
+
+    UIGraphicsImageRenderer *imageRenderer = [[UIGraphicsImageRenderer alloc] initWithSize:constrainedSize];
+
+    return [imageRenderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+        CGContextRef context = rendererContext.CGContext;
+        CGContextSaveGState(context);
+        [renderer drawInContext:context bounds:(CGRect){.size = constrainedSize}];
+        CGContextRestoreGState(context);
+    }];
 }
 
 // linkTextAttributes are only applied to UITextView

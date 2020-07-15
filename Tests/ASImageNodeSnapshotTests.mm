@@ -13,13 +13,11 @@
 
 #if AS_AT_LEAST_IOS13
 static UIImage* makeImageWithColor(UIColor *color, CGSize size) {
-  CGRect rect = CGRect{.origin = CGPointZero, .size = size};
-  UIGraphicsBeginImageContextWithOptions(size, false, 0);
-  [color setFill];
-  UIRectFill(rect);
-  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  return image;
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:size];
+    return [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+        [color setFill];
+        CGContextFillRect(rendererContext.CGContext, CGRectMake(0, 0, size.width, size.height));
+    }];
 }
 #endif
 

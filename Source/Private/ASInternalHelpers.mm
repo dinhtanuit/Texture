@@ -172,9 +172,18 @@ CGFloat ASScreenScale()
   static CGFloat __scale = 0.0;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(1, 1), YES, 0);
-    __scale = CGContextGetCTM(UIGraphicsGetCurrentContext()).a;
-    UIGraphicsEndImageContext();
+    if (@available(iOS 10.0, *)) {
+      UIGraphicsImageRendererFormat *format = [[UIGraphicsImageRendererFormat alloc] init];
+      format.opaque = YES;
+      format.scale = 0.0; // This will use the device's native scale
+      
+      UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(1, 1) format:format];
+      [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+        __scale = CGContextGetCTM(rendererContext.CGContext).a;
+      }];
+    } else {
+      // Fallback for iOS < 10
+    }
   });
   return __scale;
 }

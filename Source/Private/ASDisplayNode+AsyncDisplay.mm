@@ -296,74 +296,361 @@ using AS::MutexLocker;
   }
 
 }
-- (void)__didDisplayNodeContentWithRenderingContext:(CGContextRef)context image:(UIImage **)image drawParameters:(id _Nullable)drawParameters backgroundColor:(UIColor *)backgroundColor borderWidth:(CGFloat)borderWidth borderColor:(CGColorRef)borderColor
+
+//- (void)__didDisplayNodeContentWithRenderingContext:(CGContextRef)context
+//                                              image:(UIImage **)image
+//                                    drawParameters:(id _Nullable)drawParameters
+//                                  backgroundColor:(UIColor *)backgroundColor
+//                                       borderWidth:(CGFloat)borderWidth
+//                                       borderColor:(CGColorRef)borderColor
+//{
+//  if (context == NULL && *image == NULL) {
+//    return;
+//  }
+//  
+//  __instanceLock__.lock();
+//    ASCornerRoundingType cornerRoundingType = _cornerRoundingType;
+//    CGFloat cornerRadius = _cornerRadius;
+//    CGFloat contentsScale = _contentsScaleForDisplay;
+//    ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext = _didDisplayNodeContentWithRenderingContext;
+//    CACornerMask maskedCorners = _maskedCorners;
+//  __instanceLock__.unlock();
+//  
+//  if (context != NULL) {
+//    if (didDisplayNodeContentWithRenderingContext) {
+//      didDisplayNodeContentWithRenderingContext(context, drawParameters);
+//    }
+//  }
+//
+//  if (cornerRoundingType == ASCornerRoundingTypePrecomposited && cornerRadius > 0.0f) {
+//    CGRect bounds = CGRectZero;
+//    if (context == NULL) {
+//      bounds = self.threadSafeBounds;
+//      bounds.size.width *= contentsScale;
+//      bounds.size.height *= contentsScale;
+//      CGFloat white = 0.0f, alpha = 0.0f;
+//      [backgroundColor getWhite:&white alpha:&alpha];
+//
+//      if (@available(iOS 11.0, *)) {
+//        // Sử dụng biến tạm để tránh autorelease issue
+//        UIImage *__block tempImage = *image;
+//
+//        UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat preferredFormat];
+//        format.opaque = (alpha == 1.0f);
+//        format.scale = contentsScale;
+//
+//        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:bounds.size format:format];
+//
+//        UIImage *renderedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+//            CGContextRef ctx = rendererContext.CGContext;
+//            ASDisplayNodeAssert(ctx, @"context is expected to be valid %@", self);
+//            
+//            if (tempImage) {
+//                [tempImage drawInRect:bounds]; // Sử dụng biến tạm thay vì *image
+//            }
+//        }];
+//
+//        *image = renderedImage; // Gán lại giá trị cuối cùng cho *image
+//      } else {
+//        // Fallback cho iOS < 11
+//      }
+//    } else {
+//      bounds = CGContextGetClipBoundingBox(context);
+//    }
+//    
+//    ASDisplayNodeAssert(UIGraphicsGetCurrentContext(), @"context is expected to be pushed on UIGraphics stack %@", self);
+//    
+//    UIBezierPath *roundedHole = [UIBezierPath bezierPathWithRect:bounds];
+//    CGSize radii = CGSizeMake(cornerRadius * contentsScale, cornerRadius * contentsScale);
+//    [roundedHole appendPath:[UIBezierPath bezierPathWithRoundedRect:bounds
+//                                                  byRoundingCorners:maskedCorners
+//                                                        cornerRadii:radii]];
+//    roundedHole.usesEvenOddFillRule = YES;
+//    
+//    UIBezierPath *roundedPath = nil;
+//    if (borderWidth > 0.0f) {
+//      CGFloat strokeThickness = borderWidth * contentsScale;
+//      CGFloat strokeInset = ((strokeThickness + 1.0f) / 2.0f) - 1.0f;
+//      roundedPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(bounds, strokeInset, strokeInset)
+//                                               cornerRadius:_cornerRadius * contentsScale];
+//      roundedPath.lineWidth = strokeThickness;
+//      [[UIColor colorWithCGColor:borderColor] setStroke];
+//    }
+//    
+//    [backgroundColor setFill];
+//    [roundedHole fillWithBlendMode:kCGBlendModeCopy alpha:1.0f];
+//    
+//    [roundedPath stroke];
+//    
+//    if (context == NULL) {
+//      UIGraphicsEndImageContext();
+//    }
+//  }
+//}
+
+//- (void)__didDisplayNodeContentWithRenderingContext:(CGContextRef)context
+//                                              image:(UIImage **)image
+//                                    drawParameters:(id _Nullable)drawParameters
+//                                  backgroundColor:(UIColor *)backgroundColor
+//                                       borderWidth:(CGFloat)borderWidth
+//                                       borderColor:(CGColorRef)borderColor
+//{
+//  NSLog(@"=======📌 crash __didDisplayNodeContentWithRenderingContext");
+//
+//    if (context == NULL && *image == NULL) {
+//        return;
+//    }
+//
+//    __instanceLock__.lock();
+//    ASCornerRoundingType cornerRoundingType = _cornerRoundingType;
+//    CGFloat cornerRadius = _cornerRadius;
+//    CGFloat contentsScale = _contentsScaleForDisplay;
+//    ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext = _didDisplayNodeContentWithRenderingContext;
+//    CACornerMask maskedCorners = _maskedCorners;
+//    __instanceLock__.unlock();
+//
+//    if (context != NULL) {
+//        if (didDisplayNodeContentWithRenderingContext) {
+//            didDisplayNodeContentWithRenderingContext(context, drawParameters);
+//        }
+//    }
+//
+//    if (cornerRoundingType == ASCornerRoundingTypePrecomposited && cornerRadius > 0.0f) {
+//        CGRect bounds = CGRectZero;
+//        
+//        if (context == NULL) {
+//            bounds = self.threadSafeBounds;
+//            bounds.size.width *= contentsScale;
+//            bounds.size.height *= contentsScale;
+//            CGFloat white = 0.0f, alpha = 0.0f;
+//            [backgroundColor getWhite:&white alpha:&alpha];
+//
+//            if (@available(iOS 11.0, *)) {
+//                // Sử dụng biến tạm để tránh autorelease issue
+//                UIImage *__block tempImage = *image;
+//
+//                UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat preferredFormat];
+//                format.opaque = (alpha == 1.0f);
+//                format.scale = contentsScale;
+//
+//                UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:bounds.size format:format];
+//
+//                UIImage *renderedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+//                    CGContextRef ctx = rendererContext.CGContext;
+//                    if (!ctx) {
+//                        NSLog(@"❌ CGContext trong rendererContext bị NULL!");
+//                        return;
+//                    }
+//
+//                    UIGraphicsPushContext(ctx); // ✅ Luôn push trước khi vẽ
+//
+//                    if (tempImage) {
+//                        [tempImage drawInRect:bounds];
+//                    }
+//
+//                    UIGraphicsPopContext(); // ✅ Pop lại sau khi vẽ
+//                }];
+//
+//                *image = renderedImage; // Gán lại giá trị cuối cùng cho *image
+//            } else {
+//                // Fallback cho iOS < 11
+//            }
+//        } else {
+//            bounds = CGContextGetClipBoundingBox(context);
+//        }
+//
+//        CGContextRef currentContext = UIGraphicsGetCurrentContext();
+//        if (!currentContext) {
+//            NSLog(@"❌ Không có context trên stack!");
+//            return;
+//        }
+//
+//        UIBezierPath *roundedHole = [UIBezierPath bezierPathWithRect:bounds];
+//        CGSize radii = CGSizeMake(cornerRadius * contentsScale, cornerRadius * contentsScale);
+//        [roundedHole appendPath:[UIBezierPath bezierPathWithRoundedRect:bounds
+//                                                      byRoundingCorners:maskedCorners
+//                                                            cornerRadii:radii]];
+//        roundedHole.usesEvenOddFillRule = YES;
+//
+//        UIBezierPath *roundedPath = nil;
+//        if (borderWidth > 0.0f) {
+//            CGFloat strokeThickness = borderWidth * contentsScale;
+//            CGFloat strokeInset = ((strokeThickness + 1.0f) / 2.0f) - 1.0f;
+//            roundedPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(bounds, strokeInset, strokeInset)
+//                                                     cornerRadius:_cornerRadius * contentsScale];
+//            roundedPath.lineWidth = strokeThickness;
+//            [[UIColor colorWithCGColor:borderColor] setStroke];
+//        }
+//
+//        [backgroundColor setFill];
+//        [roundedHole fillWithBlendMode:kCGBlendModeCopy alpha:1.0f];
+//
+//        [roundedPath stroke];
+//
+//        // Kiểm tra context trước khi gọi UIGraphicsEndImageContext()
+//        if (context == NULL) {
+//            if (UIGraphicsGetCurrentContext() != NULL) {
+//                NSLog(@"📌 Kết thúc image context");
+//                UIGraphicsEndImageContext();
+//            } else {
+//                NSLog(@"❌ Không có context để kết thúc!");
+//            }
+//        }
+//    }
+//}
+
+- (void)__didDisplayNodeContentWithRenderingContext:(CGContextRef)context
+                                              image:(UIImage **)image
+                                    drawParameters:(id _Nullable)drawParameters
+                                  backgroundColor:(UIColor *)backgroundColor
+                                       borderWidth:(CGFloat)borderWidth
+                                       borderColor:(CGColorRef)borderColor
 {
-  if (context == NULL && *image == NULL) {
-    return;
-  }
-  
-  __instanceLock__.lock();
+    if (context == NULL && *image == NULL) {
+        return;
+    }
+
+    __instanceLock__.lock();
     ASCornerRoundingType cornerRoundingType = _cornerRoundingType;
     CGFloat cornerRadius = _cornerRadius;
     CGFloat contentsScale = _contentsScaleForDisplay;
     ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext = _didDisplayNodeContentWithRenderingContext;
     CACornerMask maskedCorners = _maskedCorners;
-  __instanceLock__.unlock();
-  
-  if (context != NULL) {
-    if (didDisplayNodeContentWithRenderingContext) {
-      didDisplayNodeContentWithRenderingContext(context, drawParameters);
-    }
-  }
+    __instanceLock__.unlock();
 
-  if (cornerRoundingType == ASCornerRoundingTypePrecomposited && cornerRadius > 0.0f) {
-    CGRect bounds = CGRectZero;
-    if (context == NULL) {
-      bounds = self.threadSafeBounds;
-      bounds.size.width *= contentsScale;
-      bounds.size.height *= contentsScale;
-      CGFloat white = 0.0f, alpha = 0.0f;
-      [backgroundColor getWhite:&white alpha:&alpha];
-      UIGraphicsBeginImageContextWithOptions(bounds.size, (alpha == 1.0f), contentsScale);
-      [*image drawInRect:bounds];
-    } else {
-      bounds = CGContextGetClipBoundingBox(context);
+    if (context != NULL) {
+        if (didDisplayNodeContentWithRenderingContext) {
+            didDisplayNodeContentWithRenderingContext(context, drawParameters);
+        }
     }
-    
-    ASDisplayNodeAssert(UIGraphicsGetCurrentContext(), @"context is expected to be pushed on UIGraphics stack %@", self);
-    
-    UIBezierPath *roundedHole = [UIBezierPath bezierPathWithRect:bounds];
-    CGSize radii = CGSizeMake(cornerRadius * contentsScale, cornerRadius * contentsScale);
-    [roundedHole appendPath:[UIBezierPath bezierPathWithRoundedRect:bounds
-                                                  byRoundingCorners:maskedCorners
-                                                        cornerRadii:radii]];
-    roundedHole.usesEvenOddFillRule = YES;
-    
-    UIBezierPath *roundedPath = nil;
-    if (borderWidth > 0.0f) {  // Don't create roundedPath and stroke if borderWidth is 0.0
-      CGFloat strokeThickness = borderWidth * contentsScale;
-      CGFloat strokeInset = ((strokeThickness + 1.0f) / 2.0f) - 1.0f;
-      roundedPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(bounds, strokeInset, strokeInset)
-                                               cornerRadius:_cornerRadius * contentsScale];
-      roundedPath.lineWidth = strokeThickness;
-      [[UIColor colorWithCGColor:borderColor] setStroke];
+
+    if (cornerRoundingType == ASCornerRoundingTypePrecomposited && cornerRadius > 0.0f) {
+        CGRect bounds = CGRectZero;
+        
+        if (context == NULL) {
+            bounds = self.threadSafeBounds;
+            bounds.size.width *= contentsScale;
+            bounds.size.height *= contentsScale;
+            CGFloat white = 0.0f, alpha = 0.0f;
+            [backgroundColor getWhite:&white alpha:&alpha];
+
+            if (@available(iOS 11.0, *)) {
+                UIImage *__block tempImage = *image;
+
+                UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat preferredFormat];
+                format.opaque = (alpha == 1.0f);
+                format.scale = contentsScale;
+
+                UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:bounds.size format:format];
+
+                UIImage *renderedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+                    CGContextRef ctx = rendererContext.CGContext;
+                    if (!ctx) {
+                        NSLog(@"❌ CGContext trong rendererContext bị NULL!");
+                        return;
+                    }
+
+                    UIGraphicsPushContext(ctx); // ✅ Đảm bảo context được push trước khi vẽ
+
+                    // Chuyển đổi maskedCorners sang UIRectCorner
+                    UIRectCorner rectCorners = 0;
+                    if (maskedCorners & kCALayerMinXMinYCorner) rectCorners |= UIRectCornerTopLeft;
+                    if (maskedCorners & kCALayerMaxXMinYCorner) rectCorners |= UIRectCornerTopRight;
+                    if (maskedCorners & kCALayerMinXMaxYCorner) rectCorners |= UIRectCornerBottomLeft;
+                    if (maskedCorners & kCALayerMaxXMaxYCorner) rectCorners |= UIRectCornerBottomRight;
+
+                    UIBezierPath *roundedPath = [UIBezierPath bezierPathWithRoundedRect:bounds
+                                                                       byRoundingCorners:rectCorners
+                                                                             cornerRadii:CGSizeMake(cornerRadius * contentsScale, cornerRadius * contentsScale)];
+                    [roundedPath addClip]; // ✅ Cắt phần góc tròn trước khi vẽ
+
+                    if (tempImage) {
+                        [tempImage drawInRect:bounds];
+                    }
+
+                    UIGraphicsPopContext(); // ✅ Pop lại sau khi vẽ
+                }];
+
+                *image = renderedImage; // Gán lại giá trị cuối cùng cho *image
+            } else {
+                // Fallback cho iOS < 11
+                UIGraphicsBeginImageContextWithOptions(bounds.size, (alpha == 1.0f), contentsScale);
+                CGContextRef legacyContext = UIGraphicsGetCurrentContext();
+                if (legacyContext) {
+                    UIGraphicsPushContext(legacyContext);
+
+                    UIRectCorner rectCorners = 0;
+                    if (maskedCorners & kCALayerMinXMinYCorner) rectCorners |= UIRectCornerTopLeft;
+                    if (maskedCorners & kCALayerMaxXMinYCorner) rectCorners |= UIRectCornerTopRight;
+                    if (maskedCorners & kCALayerMinXMaxYCorner) rectCorners |= UIRectCornerBottomLeft;
+                    if (maskedCorners & kCALayerMaxXMaxYCorner) rectCorners |= UIRectCornerBottomRight;
+
+                    UIBezierPath *roundedPath = [UIBezierPath bezierPathWithRoundedRect:bounds
+                                                                       byRoundingCorners:rectCorners
+                                                                             cornerRadii:CGSizeMake(cornerRadius * contentsScale, cornerRadius * contentsScale)];
+                    [roundedPath addClip];
+
+                    if (*image) {
+                        [*image drawInRect:bounds];
+                    }
+
+                    UIGraphicsPopContext();
+                    *image = UIGraphicsGetImageFromCurrentImageContext();
+                }
+                UIGraphicsEndImageContext();
+            }
+        } else {
+            bounds = CGContextGetClipBoundingBox(context);
+        }
+
+        CGContextRef currentContext = UIGraphicsGetCurrentContext();
+        if (!currentContext) {
+            NSLog(@"❌ Không có context trên stack!");
+            return;
+        }
+
+        UIRectCorner rectCorners = 0;
+        if (maskedCorners & kCALayerMinXMinYCorner) rectCorners |= UIRectCornerTopLeft;
+        if (maskedCorners & kCALayerMaxXMinYCorner) rectCorners |= UIRectCornerTopRight;
+        if (maskedCorners & kCALayerMinXMaxYCorner) rectCorners |= UIRectCornerBottomLeft;
+        if (maskedCorners & kCALayerMaxXMaxYCorner) rectCorners |= UIRectCornerBottomRight;
+
+        UIBezierPath *roundedHole = [UIBezierPath bezierPathWithRect:bounds];
+        [roundedHole appendPath:[UIBezierPath bezierPathWithRoundedRect:bounds
+                                                       byRoundingCorners:rectCorners
+                                                             cornerRadii:CGSizeMake(cornerRadius * contentsScale, cornerRadius * contentsScale)]];
+        roundedHole.usesEvenOddFillRule = YES;
+
+        UIBezierPath *roundedPath = nil;
+        if (borderWidth > 0.0f) {
+            CGFloat strokeThickness = borderWidth * contentsScale;
+            CGFloat strokeInset = ((strokeThickness + 1.0f) / 2.0f) - 1.0f;
+            roundedPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(bounds, strokeInset, strokeInset)
+                                                     cornerRadius:_cornerRadius * contentsScale];
+            roundedPath.lineWidth = strokeThickness;
+            [[UIColor colorWithCGColor:borderColor] setStroke];
+        }
+
+        [backgroundColor setFill];
+        [roundedHole addClip]; // ✅ Cắt đúng vùng góc bo trước khi fill
+        UIRectFill(bounds);
+
+        [roundedPath stroke];
+
+        if (context == NULL) {
+            if (UIGraphicsGetCurrentContext() != NULL) {
+                NSLog(@"📌 Kết thúc image context");
+                UIGraphicsEndImageContext();
+            } else {
+                NSLog(@"❌ Không có context để kết thúc!");
+            }
+        }
     }
-    
-    // Punch out the corners by copying the backgroundColor over them.
-    // This works for everything from clearColor to opaque colors.
-    [backgroundColor setFill];
-    [roundedHole fillWithBlendMode:kCGBlendModeCopy alpha:1.0f];
-    
-    [roundedPath stroke];  // Won't do anything if borderWidth is 0 and roundedPath is nil.
-    
-    if (*image) {
-      *image = UIGraphicsGetImageFromCurrentImageContext();
-    }
-    if (context == NULL) {
-      UIGraphicsEndImageContext();
-    }
-  }
 }
+
+
+
+
 
 - (void)displayAsyncLayer:(_ASDisplayLayer *)asyncLayer asynchronously:(BOOL)asynchronously
 {
