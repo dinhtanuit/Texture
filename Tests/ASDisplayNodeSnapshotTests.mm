@@ -36,12 +36,11 @@
 
 NS_INLINE UIImage *BlueImageMake(CGRect bounds)
 {
-  UIGraphicsBeginImageContextWithOptions(bounds.size, YES, 0);
-  [[UIColor blueColor] setFill];
-  UIRectFill(bounds);
-  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  return image;
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:bounds.size];
+  return [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+      [[UIColor blueColor] setFill];
+      CGContextFillRect(rendererContext.CGContext, CGRectMake(0, 0, bounds.size.width, bounds.size.height));
+  }];
 }
 
 - (void)testPrecompositedCornerRounding

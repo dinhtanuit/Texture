@@ -1292,14 +1292,21 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   NS_VALID_UNTIL_END_OF_SCOPE __weak UIImage *weakImage = nil;
   NS_VALID_UNTIL_END_OF_SCOPE __weak NSArray *weakArray = nil;
   __block NS_VALID_UNTIL_END_OF_SCOPE ASTestDisplayNode *node = nil;
+
   @autoreleasepool {
     node = [[ASTestDisplayNode alloc] init];
     node.gestureRecognizer = [[UIGestureRecognizer alloc] init];
     node.idGestureRecognizer = [[UIGestureRecognizer alloc] init];
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(1000, 1000), YES, 1);
-    node.bigImage = UIGraphicsGetImageFromCurrentImageContext();
+
+    CGSize imageSize = CGSizeMake(1000, 1000);
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:imageSize];
+    node.bigImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+        [[UIColor whiteColor] setFill];
+        CGContextFillRect(rendererContext.CGContext, CGRectMake(0, 0, imageSize.width, imageSize.height));
+    }];
+
     node.randomProperty = @[ @"Hello, world!" ];
-    UIGraphicsEndImageContext();
+
     weakImage = node.bigImage;
     weakView = node.view;
     weakLayer = node.layer;
@@ -1319,12 +1326,14 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNil(weakImage, @"UIImage ivars should be deallocated normally.");
   XCTAssertNil(weakArray, @"NSArray ivars should be deallocated normally.");
   XCTAssertNil(node);
-  
+
   [self expectationForPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nonnull evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
     return (weakRecognizer == nil && weakIdRecognizer == nil && weakView == nil);
   }] evaluatedWithObject:(id)kCFNull handler:nil];
+
   [self waitForExpectationsWithTimeout:10 handler:nil];
 }
+
 
 - (void)testSubnodes
 {

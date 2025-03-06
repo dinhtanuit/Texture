@@ -1011,32 +1011,34 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   if ((size.width * size.height) < CGFLOAT_EPSILON) {
     return nil;
   }
-  
+
   ASLockScopeSelf();
-  
-  UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
-  [self.placeholderColor setFill];
 
-  ASTextKitRenderer *renderer = [self _locked_renderer];
-  NSRange visibleRange = renderer.firstVisibleRange;
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:size];
+  UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+      CGContextRef ctx = context.CGContext;
+      [self.placeholderColor setFill];
 
-  // cap height is both faster and creates less subpixel blending
-  NSArray *lineRects = [self _rectsForTextRange:visibleRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
+      ASTextKitRenderer *renderer = [self _locked_renderer];
+      NSRange visibleRange = renderer.firstVisibleRange;
 
-  // fill each line with the placeholder color
-  for (NSValue *rectValue in lineRects) {
-    CGRect lineRect = [rectValue CGRectValue];
-    CGRect fillBounds = CGRectIntegral(UIEdgeInsetsInsetRect(lineRect, self.placeholderInsets));
+      // cap height is both faster and creates less subpixel blending
+      NSArray *lineRects = [self _rectsForTextRange:visibleRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
 
-    if (fillBounds.size.width > 0.0 && fillBounds.size.height > 0.0) {
-      UIRectFill(fillBounds);
-    }
-  }
+      // fill each line with the placeholder color
+      for (NSValue *rectValue in lineRects) {
+          CGRect lineRect = [rectValue CGRectValue];
+          CGRect fillBounds = CGRectIntegral(UIEdgeInsetsInsetRect(lineRect, self.placeholderInsets));
 
-  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
+          if (fillBounds.size.width > 0.0 && fillBounds.size.height > 0.0) {
+              CGContextFillRect(ctx, fillBounds);
+          }
+      }
+  }];
+
   return image;
 }
+
 
 #pragma mark - Touch Handling
 
